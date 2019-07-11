@@ -249,6 +249,7 @@ def mine():
 
     values = request.get_json()
     required =['id','proof']
+    print(values['id'])
     
     if not all(k in values for k in required):
         return 'Missing Values', 400
