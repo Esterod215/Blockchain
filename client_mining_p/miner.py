@@ -5,6 +5,16 @@ import sys
 
 
 # TODO: Implement functionality to search for a proof 
+def proof_search():
+    #this was my testing to get a hold of requests
+    # res = requests.get('http://0.0.0.0:5000/chain')
+    # res.json()
+    # return res.json()['chain'][0]['proof']
+    
+
+    
+
+
 
 
 if __name__ == '__main__':
@@ -15,6 +25,7 @@ if __name__ == '__main__':
         node = "http://localhost:5000"
 
     coins_mined = 0
+    print(proof_search())
     # Run forever until interrupted
     while True:
         # TODO: Get the last proof from the server and look for a new one
