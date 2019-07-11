@@ -99,7 +99,7 @@ class Blockchain(object):
         """
         guess = f'{last_proof}{proof}'.encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
-        return guess_hash[:4] == "000000"
+        return guess_hash[:2] == "00"
 
     def valid_chain(self, chain):
         """
@@ -144,7 +144,7 @@ blockchain = Blockchain()
 @app.route('/mine', methods=['POST'])
 def mine():
     # We run the proof of work algorithm to get the next proof...
-    # last_block = blockchain.last_block
+    last_block = blockchain.last_block
     # last_proof = last_block['proof']
     # proof = blockchain.proof_of_work(last_proof)
 
@@ -156,13 +156,15 @@ def mine():
     #     amount=1,
     # )
     values = request.get_json()
-    # print(values['proof'])
+    print(values)
     required = ['last_proof','proof']
     if not all(k in values for k in required):
         return "Missing values", 400
     
     if blockchain.valid_proof(values['last_proof'],values['proof']):
-        response = {"message": "Success"}
+        previous_hash = blockchain.hash(last_block)
+        block = blockchain.new_block(values['proof'], previous_hash)
+        response = {'message': "New Block Forged"}
         return jsonify(response), 200
     else:
         response = {"message": "Failure"}
