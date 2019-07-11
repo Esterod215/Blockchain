@@ -99,7 +99,7 @@ class Blockchain(object):
         """
         guess = f'{last_proof}{proof}'.encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
-        return guess_hash[:2] == "00"
+        return guess_hash[:6] == "000000"
 
     def valid_chain(self, chain):
         """
@@ -145,7 +145,7 @@ blockchain = Blockchain()
 def mine():
     # We run the proof of work algorithm to get the next proof...
     last_block = blockchain.last_block
-    # last_proof = last_block['proof']
+    last_proof = last_block['proof']
     # proof = blockchain.proof_of_work(last_proof)
 
     # We must receive a reward for finding the proof.
@@ -155,36 +155,57 @@ def mine():
     #     recipient=node_identifier,
     #     amount=1,
     # )
-    values = request.get_json()
-    print(values)
-    required = ['last_proof','proof']
-    if not all(k in values for k in required):
-        return "Missing values", 400
+  
+    #Previous work I did
+    # values = request.get_json()
+    # print(values)
+    # required = ['last_proof','proof']
+    # if not all(k in values for k in required):
+    #     return "Missing values", 400
     
-    if blockchain.valid_proof(values['last_proof'],values['proof']):
-        previous_hash = blockchain.hash(last_block)
-        block = blockchain.new_block(values['proof'], previous_hash)
-        response = {'message': "New Block Forged"}
-        return jsonify(response), 200
-    else:
-        response = {"message": "Failure"}
-        return jsonify(response), 200
-    
+    # if blockchain.valid_proof(values['last_proof'],values['proof']):
+    #     previous_hash = blockchain.hash(last_block)
+    #     block = blockchain.new_block(values['proof'], previous_hash)
+    #     response = {'message': "New Block Forged"}
+    #     return jsonify(response), 200
+    # else:
+    #     response = {"message": "Failure"}
+    #     return jsonify(response), 200
 
+    #done in the lecture:
+
+    values = request.get_json()
+    required = ['proof']
+    if not all(k in values for k in required):
+        return 'Missing Values', 400
+
+    if not blockchain.valid_proof(last_proof,values['proof']):
+        response={
+            'message':"Proof is invalid or already submitted"
+        }
+        return jsonify(response), 200
+    
+    #We must receive a reward for finding the proof.
+   #The sender is "0" to signify that this node has mine a new coin
+    blockchain.new_transaction(
+        sender="0",
+        recipient=node_identifier,
+        amount=1,
+    )
 
 
     # Forge the new BLock by adding it to the chain
-    # previous_hash = blockchain.hash(last_block)
-    # block = blockchain.new_block(proof, previous_hash)
+    previous_hash = blockchain.hash(last_block)
+    block = blockchain.new_block(values['proof'], previous_hash)
 
-    # response = {
-    #     'message': "New Block Forged",
-    #     'index': block['index'],
-    #     'transactions': block['transactions'],
-    #     'proof': block['proof'],
-    #     'previous_hash': block['previous_hash'],
-    # }
-    # return jsonify(response), 200
+    response = {
+        'message': "New Block Forged",
+        'index': block['index'],
+        'transactions': block['transactions'],
+        'proof': block['proof'],
+        'previous_hash': block['previous_hash'],
+    }
+    return jsonify(response), 200
 
 
 @app.route('/transactions/new', methods=['POST'])
@@ -216,7 +237,7 @@ def full_chain():
 @app.route('/last_proof', methods=['GET'])
 def get_last_proof():
     response = {
-        'last_proof': blockchain.chain[-1]['proof']
+        'last_proof': blockchain.last_block['proof']
     }
     return jsonify(response), 200
 
