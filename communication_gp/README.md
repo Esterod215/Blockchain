@@ -11,3 +11,4 @@ Modify the server we created to:
 * When a new block is mined, alert all nodes in its list of registered nodes to add the new block
 * Receive a new block from one of the nodes in its list of registered nodes, *validate it*, and add it to the chain, or, if necessary, query for the entire chain
 * Validate the new block by checking the index, previous hash, and proof
+* Run servers on diff ports

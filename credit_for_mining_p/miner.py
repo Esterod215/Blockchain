@@ -1,7 +1,8 @@
 import hashlib
 import requests
-
+import os
 import sys
+import uuid
 
 
 def proof_of_work(last_proof):
@@ -30,6 +31,17 @@ def valid_proof(last_proof, proof):
     guess_hash = hashlib.sha256(guess).hexdigest()
     return guess_hash[:6] == "000000"
 
+def get_id():
+    exists = os.path.isfile('my_id.txt')
+    if exists:
+        print('file exists')
+        file_object = open('my_id.txt','r')
+        id = file_object.read()
+        file_object.close()
+    else:
+        id = uuid.uuid1().hex
+        print('File does not exist')
+    return id
 
 if __name__ == '__main__':
     # What node are we interacting with?
@@ -39,14 +51,17 @@ if __name__ == '__main__':
         node = "http://localhost:5000"
 
     coins_mined = 0
+    print(get_id())
+    
     # Run forever until interrupted
     while True:
         # Get the last proof from the server
         r = requests.get(url=node + "/last_proof")
         data = r.json()
         new_proof = proof_of_work(data.get('proof'))
+        user_id = get_id()
 
-        post_data = {"proof": new_proof}
+        post_data = {"id":user_id,"proof": new_proof}
 
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
