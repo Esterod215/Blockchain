@@ -46,7 +46,7 @@ if __name__ == '__main__':
         data = r.json()
         new_proof = proof_of_work(data.get('proof'))
 
-        post_data = {"proof": new_proof}
+        post_data = {"id":7,"proof": new_proof}
 
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
